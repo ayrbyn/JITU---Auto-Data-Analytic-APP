@@ -16,78 +16,78 @@ class InsightNarrator:
     Translates analytical results into business insights and actionable recommendations
     """
     
-@staticmethod
-def narrate_trend(trend_analysis: Dict[str, any]) -> Dict[str, str]:
-    """
-    Generate insight from trend analysis
-    
-    Args:
-        trend_analysis: Dictionary from BusinessAnalyzer.get_trend_direction()
+    @staticmethod
+    def narrate_trend(trend_analysis: Dict[str, any]) -> Dict[str, str]:
+        """
+        Generate insight from trend analysis
         
-    Returns:
-        Dictionary with insight type and message
-    """
-    direction = trend_analysis['direction']
-    change = trend_analysis['change_percentage']
-    volatility = trend_analysis.get('volatility', 'unknown')
-    cv = trend_analysis.get('coefficient_of_variation', 0)
-    
-    if direction == 'insufficient_data':
-        return {
-            'type': 'warning',
-            'title': 'Data Terbatas',
-            'message': 'Belum cukup data untuk menganalisis tren. Upload lebih banyak transaksi untuk mendapat insight yang lebih baik.'
-        }
-    
-    # Handle volatile patterns
-    if direction == 'volatile':
-        return {
-            'type': 'warning',
-            'title': 'Penjualan Tidak Stabil',
-            'message': f'Penjualan Anda sangat fluktuatif (volatilitas {cv:.1f}%). Grafik naik-turun drastis menandakan bisnis tidak predictable. Identifikasi penyebabnya: apakah stok tidak konsisten, harga berubah-ubah, atau faktor eksternal seperti hari libur? Stabilkan operasional untuk pertumbuhan yang lebih sehat.'
-        }
-    
-    if direction == 'up':
-        if volatility == 'high':
-            return {
-                'type': 'info',
-                'title': 'Tren Naik Tapi Tidak Stabil',
-                'message': f'Penjualan naik {abs(change):.1f}% tapi sangat fluktuatif (volatilitas {cv:.1f}%). Meskipun tren positif, penjualan naik-turun drastis. Cari cara untuk stabilkan operasional agar pertumbuhan lebih konsisten.'
-            }
-        else:
-            return {
-                'type': 'success',
-                'title': 'Tren Positif',
-                'message': f'Penjualan naik {abs(change):.1f}% dalam periode ini. Pertahankan strategi yang sedang berjalan dan pastikan stok selalu tersedia.'
-            }
-    
-    elif direction == 'down':
-        if volatility == 'high':
-            return {
-                'type': 'danger',
-                'title': 'Penjualan Turun dan Tidak Stabil',
-                'message': f'PERHATIAN: Penjualan turun {abs(change):.1f}% DAN sangat fluktuatif (volatilitas {cv:.1f}%). Ini kombinasi berbahaya. Segera evaluasi: kualitas produk, harga, kompetitor, dan konsistensi stok. Bisnis dalam kondisi kritis.'
-            }
-        else:
-            return {
-                'type': 'danger',
-                'title': 'Peringatan Dini',
-                'message': f'Penjualan turun {abs(change):.1f}% dalam periode ini. Pertimbangkan untuk membuat promo atau evaluasi harga dan kualitas produk.'
-            }
-    
-    else:  # stable
-        if volatility == 'high':
+        Args:
+            trend_analysis: Dictionary from BusinessAnalyzer.get_trend_direction()
+            
+        Returns:
+            Dictionary with insight type and message
+        """
+        direction = trend_analysis['direction']
+        change = trend_analysis['change_percentage']
+        volatility = trend_analysis.get('volatility', 'unknown')
+        cv = trend_analysis.get('coefficient_of_variation', 0)
+        
+        if direction == 'insufficient_data':
             return {
                 'type': 'warning',
-                'title': 'Stabil Tapi Fluktuatif',
-                'message': f'Rata-rata penjualan stabil (perubahan {abs(change):.1f}%), TAPI grafik naik-turun drastis (volatilitas {cv:.1f}%). Ini bukan kondisi sehat. Cari penyebab fluktuasi: hari libur, stok tidak teratur, atau faktor lain. Stabilkan operasional Anda.'
+                'title': 'Data Terbatas',
+                'message': 'Belum cukup data untuk menganalisis tren. Upload lebih banyak transaksi untuk mendapat insight yang lebih baik.'
             }
-        else:
+        
+        # Handle volatile patterns
+        if direction == 'volatile':
             return {
-                'type': 'info',
-                'title': 'Tren Stabil',
-                'message': f'Penjualan relatif stabil (perubahan {abs(change):.1f}%). Ini waktu yang baik untuk mencoba strategi baru tanpa risiko besar.'
+                'type': 'warning',
+                'title': 'Penjualan Tidak Stabil',
+                'message': f'Penjualan Anda sangat fluktuatif (volatilitas {cv:.1f}%). Grafik naik-turun drastis menandakan bisnis tidak predictable. Identifikasi penyebabnya: apakah stok tidak konsisten, harga berubah-ubah, atau faktor eksternal seperti hari libur? Stabilkan operasional untuk pertumbuhan yang lebih sehat.'
             }
+        
+        if direction == 'up':
+            if volatility == 'high':
+                return {
+                    'type': 'info',
+                    'title': 'Tren Naik Tapi Tidak Stabil',
+                    'message': f'Penjualan naik {abs(change):.1f}% tapi sangat fluktuatif (volatilitas {cv:.1f}%). Meskipun tren positif, penjualan naik-turun drastis. Cari cara untuk stabilkan operasional agar pertumbuhan lebih konsisten.'
+                }
+            else:
+                return {
+                    'type': 'success',
+                    'title': 'Tren Positif',
+                    'message': f'Penjualan naik {abs(change):.1f}% dalam periode ini. Pertahankan strategi yang sedang berjalan dan pastikan stok selalu tersedia.'
+                }
+        
+        elif direction == 'down':
+            if volatility == 'high':
+                return {
+                    'type': 'danger',
+                    'title': 'Penjualan Turun dan Tidak Stabil',
+                    'message': f'PERHATIAN: Penjualan turun {abs(change):.1f}% DAN sangat fluktuatif (volatilitas {cv:.1f}%). Ini kombinasi berbahaya. Segera evaluasi: kualitas produk, harga, kompetitor, dan konsistensi stok. Bisnis dalam kondisi kritis.'
+                }
+            else:
+                return {
+                    'type': 'danger',
+                    'title': 'Peringatan Dini',
+                    'message': f'Penjualan turun {abs(change):.1f}% dalam periode ini. Pertimbangkan untuk membuat promo atau evaluasi harga dan kualitas produk.'
+                }
+        
+        else:  # stable
+            if volatility == 'high':
+                return {
+                    'type': 'warning',
+                    'title': 'Stabil Tapi Fluktuatif',
+                    'message': f'Rata-rata penjualan stabil (perubahan {abs(change):.1f}%), TAPI grafik naik-turun drastis (volatilitas {cv:.1f}%). Ini bukan kondisi sehat. Cari penyebab fluktuasi: hari libur, stok tidak teratur, atau faktor lain. Stabilkan operasional Anda.'
+                }
+            else:
+                return {
+                    'type': 'info',
+                    'title': 'Tren Stabil',
+                    'message': f'Penjualan relatif stabil (perubahan {abs(change):.1f}%). Ini waktu yang baik untuk mencoba strategi baru tanpa risiko besar.'
+                }
     
     @staticmethod
     def narrate_top_product(top_products: pd.DataFrame, metric: str = 'quantity') -> Dict[str, str]:
