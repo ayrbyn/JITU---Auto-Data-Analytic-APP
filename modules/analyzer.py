@@ -234,14 +234,86 @@ class BusinessAnalyzer:
         
         return pareto_products, percentage_of_products
     
-    @staticmethod
-    def get_trend_direction(
-        df: pd.DataFrame,
-        date_col: str = 'date',
-        price_col: str = 'price',
-        window: int = 3
-    ) -> Dict[str, any]:
-        """
+@staticmethod
+def get_trend_direction(
+    df: pd.DataFrame,
+    date_col: str = 'date',
+    price_col: str = 'price',
+    window: int = 3
+) -> Dict[str, any]:
+    """
+    Analyze if sales trend is going up or down
+    Includes volatility detection for unstable patterns
+    
+    Args:
+        df: Transaction dataframe
+        date_col: Name of date column
+        price_col: Name of price column
+        window: Number of recent days to compare
+        
+    Returns:
+        Dictionary with trend analysis including volatility
+    """
+    trend_data = BusinessAnalyzer.get_sales_trend(df, date_col, price_col, freq='D')
+    
+    if len(trend_data) < window * 2:
+        return {
+            'direction': 'insufficient_data',
+            'change_percentage': 0.0,
+            'recent_avg': 0.0,
+            'previous_avg': 0.0,
+            'volatility': 'unknown',
+            'coefficient_of_variation': 0.0
+        }
+    
+    # Compare last N days with previous N days
+    recent_data = trend_data.tail(window)
+    previous_data = trend_data.tail(window * 2).head(window)
+    
+    recent_avg = recent_data['revenue'].mean()
+    previous_avg = previous_data['revenue'].mean()
+    
+    if previous_avg == 0:
+        change_percentage = 0.0
+    else:
+        change_percentage = ((recent_avg - previous_avg) / previous_avg) * 100
+    
+    # Calculate volatility using coefficient of variation
+    # CV = (standard deviation / mean) * 100
+    recent_std = recent_data['revenue'].std()
+    if recent_avg > 0:
+        coefficient_of_variation = (recent_std / recent_avg) * 100
+    else:
+        coefficient_of_variation = 0.0
+    
+    # Determine volatility level
+    if coefficient_of_variation > 50:
+        volatility = 'high'
+    elif coefficient_of_variation > 25:
+        volatility = 'moderate'
+    else:
+        volatility = 'low'
+    
+    # Adjust direction based on volatility
+    if volatility == 'high' and abs(change_percentage) < 5:
+        # High volatility but average change is small = volatile pattern
+        direction = 'volatile'
+    elif change_percentage > 5:
+        direction = 'up'
+    elif change_percentage < -5:
+        direction = 'down'
+    else:
+        direction = 'stable'
+    
+    return {
+        'direction': direction,
+        'change_percentage': change_percentage,
+        'recent_avg': recent_avg,
+        'previous_avg': previous_avg,
+        'volatility': volatility,
+        'coefficient_of_variation': coefficient_of_variation
+    }
+    """
         Analyze if sales trend is going up or down
         
         Args:
@@ -253,9 +325,8 @@ class BusinessAnalyzer:
         Returns:
             Dictionary with trend analysis
         """
-        trend_data = BusinessAnalyzer.get_sales_trend(df, date_col, price_col, freq='D')
-        
-        if len(trend_data) < window * 2:
+    trend_data = BusinessAnalyzer.get_sales_trend(df, date_col, price_col, freq='D')
+    if len(trend_data) < window * 2:
             return {
                 'direction': 'insufficient_data',
                 'change_percentage': 0.0,
@@ -264,25 +335,25 @@ class BusinessAnalyzer:
             }
         
         # Compare last N days with previous N days
-        recent_data = trend_data.tail(window)
-        previous_data = trend_data.tail(window * 2).head(window)
+    recent_data = trend_data.tail(window)
+    previous_data = trend_data.tail(window * 2).head(window)
         
-        recent_avg = recent_data['revenue'].mean()
-        previous_avg = previous_data['revenue'].mean()
+    recent_avg = recent_data['revenue'].mean()
+    previous_avg = previous_data['revenue'].mean()
         
-        if previous_avg == 0:
+    if previous_avg == 0:
             change_percentage = 0.0
-        else:
+    else:
             change_percentage = ((recent_avg - previous_avg) / previous_avg) * 100
         
-        if change_percentage > 5:
+    if change_percentage > 5:
             direction = 'up'
-        elif change_percentage < -5:
+    elif change_percentage < -5:
             direction = 'down'
-        else:
+    else:
             direction = 'stable'
         
-        return {
+    return {
             'direction': direction,
             'change_percentage': change_percentage,
             'recent_avg': recent_avg,
